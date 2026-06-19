@@ -1,0 +1,2814 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1f7a58">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Flower Flow">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <title>Flower Flow | 地域別 在庫管理</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f4;
+      --panel: #ffffff;
+      --ink: #17211d;
+      --muted: #68766e;
+      --line: #dfe5dd;
+      --soft: #eef5ef;
+      --green: #1f7a58;
+      --green-soft: #dceee5;
+      --rose: #c95066;
+      --blue: #3269a8;
+      --gold: #b88324;
+      --coral: #d96d4a;
+      --shadow: 0 16px 42px rgba(29, 48, 40, 0.08);
+      --radius: 8px;
+      font-family: Inter, "Hiragino Sans", "Yu Gothic", "Meiryo", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(180deg, rgba(31, 122, 88, 0.08), transparent 260px),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+      max-width: 1540px;
+      margin: 0 auto 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+      border-radius: var(--radius);
+      background:
+        radial-gradient(circle at 49% 30%, #fff 0 7px, transparent 8px),
+        radial-gradient(circle at 34% 46%, #e46a7c 0 10px, transparent 11px),
+        radial-gradient(circle at 65% 46%, #f19a4c 0 10px, transparent 11px),
+        radial-gradient(circle at 50% 67%, #7fb875 0 11px, transparent 12px),
+        linear-gradient(135deg, #1f7a58, #3269a8);
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.22rem;
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .brand small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .toolbar-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 5px 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .toolbar-control input {
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      outline: 0;
+      min-width: 136px;
+    }
+
+    .button {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      font-weight: 800;
+      transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+      border-color: #bdd2c4;
+      background: #fbfdfb;
+    }
+
+    .button.primary {
+      background: var(--green);
+      border-color: var(--green);
+      color: #fff;
+    }
+
+    .button.warn {
+      color: #8c3d31;
+      border-color: #e9c5ba;
+      background: #fff7f4;
+    }
+
+    .icon-button {
+      width: 40px;
+      padding: 0;
+      font-size: 1.15rem;
+    }
+
+    .sync-status {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.88);
+      color: var(--muted);
+      padding: 0 11px;
+      font-size: 0.78rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .sync-status.shared {
+      color: var(--green);
+      border-color: #b9d8c8;
+      background: #f3faf6;
+    }
+
+    .sync-status.error {
+      color: var(--rose);
+      border-color: #e8bbc4;
+      background: #fff4f6;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+      gap: 14px;
+      max-width: 1540px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    .rail {
+      position: sticky;
+      top: 16px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .rail-section {
+      padding: 14px;
+    }
+
+    .rail-section + .rail-section {
+      border-top: 1px solid var(--line);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 0.98rem;
+    }
+
+    h3 {
+      font-size: 0.95rem;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    .stack {
+      display: grid;
+      gap: 8px;
+    }
+
+    .inline-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .field {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+
+    .field input,
+    .field select,
+    .inline-form input,
+    .search input {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 10px;
+      outline: 0;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .inline-form input:focus,
+    .search input:focus,
+    .cell-input:focus,
+    .product-name:focus,
+    .price-input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(31, 122, 88, 0.12);
+    }
+
+    .region-nav {
+      display: grid;
+      gap: 7px;
+    }
+
+    .region-nav-item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 6px;
+      align-items: stretch;
+    }
+
+    .region-nav-item .region-button:only-child {
+      grid-column: 1 / -1;
+    }
+
+    .region-button {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      text-align: left;
+      color: var(--ink);
+    }
+
+    .region-button.active {
+      background: var(--green-soft);
+      border-color: var(--green);
+    }
+
+    .region-button span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 900;
+    }
+
+    .region-button small {
+      color: var(--muted);
+      display: block;
+      font-size: 0.72rem;
+      margin-top: 2px;
+    }
+
+    .region-button b {
+      color: var(--green);
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .region-edit {
+      width: 40px;
+      min-height: 46px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .region-edit:hover {
+      color: var(--green);
+      border-color: #bdd2c4;
+      background: #fbfdfb;
+    }
+
+    .store-add-form {
+      display: grid;
+      gap: 8px;
+    }
+
+    .main {
+      display: grid;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .control-strip {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .search {
+      position: relative;
+    }
+
+    .search::before {
+      content: "⌕";
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-52%);
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .search input {
+      padding-left: 34px;
+    }
+
+    .view-label {
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .image-import {
+      padding: 13px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .import-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .import-head p {
+      margin: 4px 0 0;
+    }
+
+    .import-mode {
+      display: inline-grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      padding: 3px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #f3f5f2;
+    }
+
+    .mode-button {
+      min-height: 34px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      padding: 0 10px;
+      font-size: 0.78rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .mode-button.active {
+      background: #fff;
+      color: var(--green);
+      box-shadow: 0 2px 8px rgba(29, 48, 40, 0.08);
+    }
+
+    .import-body {
+      display: grid;
+      grid-template-columns: minmax(220px, 0.72fr) minmax(280px, 1.28fr);
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .upload-zone {
+      min-height: 132px;
+      border: 1px dashed #aac9b6;
+      border-radius: var(--radius);
+      background: #f5faf7;
+      color: var(--green);
+      display: grid;
+      place-items: center;
+      gap: 6px;
+      padding: 16px;
+      text-align: center;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.dragging {
+      border-color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .upload-zone input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .preview-strip {
+      min-height: 132px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfcfb;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      overflow-x: auto;
+      padding: 10px;
+    }
+
+    .preview-empty {
+      width: 100%;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .preview-thumb {
+      width: 108px;
+      height: 108px;
+      flex: 0 0 auto;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .import-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .import-status {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .ocr-results {
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .ocr-results[hidden] {
+      display: none;
+    }
+
+    .ocr-meta {
+      display: grid;
+      grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
+      gap: 10px;
+      align-items: end;
+    }
+
+    .ocr-warning {
+      color: var(--rose);
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .ocr-table-wrap {
+      overflow-x: auto;
+    }
+
+    .ocr-table {
+      width: 100%;
+      min-width: 650px;
+      border-collapse: collapse;
+    }
+
+    .ocr-table th,
+    .ocr-table td {
+      padding: 7px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 0.8rem;
+    }
+
+    .ocr-table th {
+      color: var(--muted);
+      font-weight: 900;
+      background: #f8faf8;
+    }
+
+    .ocr-table input {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 6px 8px;
+      background: #fff;
+      outline: 0;
+    }
+
+    .confidence {
+      font-weight: 900;
+      color: var(--green);
+      white-space: nowrap;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(140px, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      min-height: 96px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      display: grid;
+      align-content: space-between;
+      gap: 8px;
+      padding: 13px;
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 900;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+      line-height: 1.05;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .metric small {
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .metric.green {
+      border-color: #b9d8c8;
+      background: linear-gradient(180deg, #fff, #f3faf6);
+    }
+
+    .metric.blue {
+      border-color: #c2d3e8;
+      background: linear-gradient(180deg, #fff, #f3f7fc);
+    }
+
+    .metric.gold {
+      border-color: #e7d0a3;
+      background: linear-gradient(180deg, #fff, #fff8ec);
+    }
+
+    .metric.rose {
+      border-color: #e8bbc4;
+      background: linear-gradient(180deg, #fff, #fff4f6);
+    }
+
+    .analytics {
+      display: grid;
+      grid-template-columns: minmax(220px, 0.7fr) minmax(320px, 1.3fr);
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .analysis-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfcfb;
+      padding: 12px;
+      display: grid;
+      gap: 9px;
+      align-content: start;
+    }
+
+    .analysis-card strong {
+      font-size: clamp(1.2rem, 2vw, 1.65rem);
+      line-height: 1.05;
+      white-space: nowrap;
+    }
+
+    .annual-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .annual-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .annual-row {
+      display: grid;
+      grid-template-columns: minmax(100px, 0.9fr) minmax(120px, 1.4fr) auto;
+      gap: 9px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 900;
+    }
+
+    .annual-row strong {
+      color: var(--ink);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .annual-bar {
+      height: 12px;
+      border-radius: 999px;
+      background: #eef0ec;
+      overflow: hidden;
+    }
+
+    .annual-bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--green);
+    }
+
+    .region-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(190px, 1fr));
+      gap: 10px;
+    }
+
+    .region-tile {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      text-align: left;
+      color: var(--ink);
+    }
+
+    .region-tile.active {
+      border-color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .tile-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+    }
+
+    .tile-top strong {
+      font-size: 1rem;
+    }
+
+    .tile-top span {
+      color: var(--green);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .tile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+
+    .tile-stats b {
+      display: block;
+      color: var(--ink);
+      font-size: 0.95rem;
+      margin-top: 2px;
+    }
+
+    .board {
+      display: grid;
+      gap: 18px;
+    }
+
+    .region-section {
+      scroll-margin-top: 16px;
+      display: grid;
+      gap: 10px;
+      animation: fadeIn 0.18s ease;
+    }
+
+    .region-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 2px;
+    }
+
+    .region-header p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .store-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(330px, 1fr));
+      gap: 12px;
+    }
+
+    .store-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: grid;
+    }
+
+    .store-card.alert {
+      border-color: #e8bbc4;
+    }
+
+    .store-card.old-alert {
+      border-color: #e18c9b;
+    }
+
+    .store-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfb;
+      align-items: start;
+    }
+
+    .store-title {
+      min-width: 0;
+    }
+
+    .store-title h3 {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .store-title .hint {
+      margin-top: 3px;
+    }
+
+    .store-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .store-actions select {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 6px 8px;
+      outline: 0;
+      max-width: 130px;
+    }
+
+    .small-icon {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--muted);
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .small-icon:hover {
+      color: var(--rose);
+      border-color: #e8bbc4;
+      background: #fff4f6;
+    }
+
+    .store-summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .store-summary div {
+      background: #fff;
+      padding: 9px 10px;
+      min-width: 0;
+    }
+
+    .store-summary span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 900;
+    }
+
+    .store-summary b {
+      display: block;
+      margin-top: 2px;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .product-list {
+      display: grid;
+      max-height: 420px;
+      overflow: auto;
+    }
+
+    .product-row {
+      display: grid;
+      grid-template-columns: minmax(130px, 1.2fr) repeat(4, minmax(58px, 0.58fr)) minmax(74px, 0.7fr) minmax(82px, 0.78fr) auto;
+      gap: 7px;
+      align-items: center;
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--line);
+      min-width: 760px;
+    }
+
+    .product-row:hover {
+      background: #fbfdfb;
+    }
+
+    .product-row.old-flower {
+      background: #fff6f7;
+      border-left: 4px solid var(--rose);
+    }
+
+    .product-cell {
+      min-width: 0;
+      display: grid;
+      gap: 4px;
+    }
+
+    .product-cell label {
+      color: var(--muted);
+      font-size: 0.66rem;
+      font-weight: 900;
+    }
+
+    .product-name {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 6px 8px;
+      outline: 0;
+      background: #fff;
+      font-weight: 800;
+    }
+
+    .product-name.old-flower-name {
+      border-color: #e18c9b;
+      color: var(--rose);
+      background: #fffafb;
+    }
+
+    .age-warning {
+      color: var(--rose);
+      font-size: 0.72rem;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .product-meta {
+      display: grid;
+      grid-template-columns: minmax(58px, 1fr) 54px;
+      gap: 6px;
+    }
+
+    .price-input,
+    .unit-select,
+    .cell-input {
+      min-height: 32px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 5px 7px;
+      outline: 0;
+    }
+
+    .price-input,
+    .cell-input {
+      width: 100%;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .unit-select {
+      width: 100%;
+    }
+
+    .computed {
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .computed.good {
+      color: var(--green);
+    }
+
+    .computed.low {
+      color: var(--gold);
+    }
+
+    .computed.bad {
+      color: var(--rose);
+    }
+
+    .amount {
+      text-align: right;
+      color: var(--ink);
+    }
+
+    .empty {
+      margin: 10px;
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      background: #fbfcfb;
+      padding: 18px;
+      color: var(--muted);
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .add-product {
+      display: grid;
+      grid-template-columns: minmax(120px, 1fr) 86px 68px auto;
+      gap: 8px;
+      padding: 10px;
+      background: #fbfcfb;
+    }
+
+    .add-product input,
+    .add-product select {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 7px 9px;
+      outline: 0;
+      min-width: 0;
+    }
+
+    .toast {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      max-width: min(360px, calc(100vw - 32px));
+      border-radius: var(--radius);
+      background: #17211d;
+      color: #fff;
+      box-shadow: var(--shadow);
+      padding: 12px 14px;
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 20;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1180px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .rail {
+        position: static;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .store-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .app {
+        padding: 12px;
+      }
+
+      .topbar,
+      .control-strip,
+      .import-body,
+      .ocr-meta,
+      .rail {
+        grid-template-columns: 1fr;
+      }
+
+      .top-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        justify-content: stretch;
+      }
+
+      .toolbar-control {
+        grid-column: 1 / -1;
+      }
+
+      .sync-status {
+        grid-column: 1 / -1;
+      }
+
+      .metrics,
+      .region-summary,
+      .analytics,
+      .store-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .product-list {
+        overflow-x: auto;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .metrics,
+      .region-summary,
+      .analytics,
+      .store-summary,
+      .add-product {
+        grid-template-columns: 1fr;
+      }
+
+      .store-head {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar" aria-label="アプリ上部">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <h1>Flower Flow</h1>
+          <small>地域ごとに店舗をまとめて、在庫と納品をすばやく入力</small>
+        </div>
+      </div>
+      <div class="top-actions">
+        <label class="toolbar-control">
+          <span>日付</span>
+          <input id="dateInput" type="date">
+        </label>
+        <button class="button icon-button" id="prevDay" title="前日" aria-label="前日">‹</button>
+        <button class="button icon-button" id="nextDay" title="翌日" aria-label="翌日">›</button>
+        <button class="button" id="carryForwardBtn" title="今日の繰越を翌日の在庫にする">↷ 翌日へ</button>
+        <button class="button" id="exportBtn" title="表示中のデータをCSVで保存">↓ CSV</button>
+        <span class="sync-status" id="syncStatus">この端末に保存</span>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="rail">
+        <section class="panel rail-section" aria-label="地域">
+          <div class="section-head">
+            <h2>地域</h2>
+            <span class="hint" id="regionCount">0地域</span>
+          </div>
+          <form class="inline-form" id="regionForm">
+            <input id="newRegion" placeholder="地域を追加" aria-label="追加する地域名" required>
+            <button class="button primary icon-button" type="submit" title="地域を追加" aria-label="地域を追加">＋</button>
+          </form>
+          <div class="region-nav" id="regionNav"></div>
+        </section>
+
+        <section class="panel rail-section" aria-label="店舗追加">
+          <div class="section-head">
+            <h2>店舗追加</h2>
+            <span class="hint" id="storeCount">0店舗</span>
+          </div>
+          <form class="store-add-form" id="storeForm">
+            <label class="field">
+              店舗名
+              <input id="newStore" placeholder="例: 田辺駅前店" required>
+            </label>
+            <label class="field">
+              地域
+              <select id="newStoreRegion"></select>
+            </label>
+            <button class="button primary" type="submit">＋ 店舗を追加</button>
+          </form>
+        </section>
+      </aside>
+
+      <main class="main">
+        <section class="control-strip">
+          <div class="search">
+            <input id="searchInput" type="search" placeholder="店舗・花材で検索">
+          </div>
+          <div class="view-label" id="viewLabel">全地域を表示中</div>
+        </section>
+
+        <section class="panel image-import" aria-label="画像から自動入力">
+          <header class="import-head">
+            <div>
+              <h2 id="importTitle">在庫表画像から店舗・花材を追加</h2>
+              <p class="hint" id="importDescription">スプレッドシートの画像から店舗名、左列の花材名、単価を読み取ります。</p>
+            </div>
+            <div class="import-mode" id="importMode" role="tablist" aria-label="画像の種類">
+              <button class="mode-button active" data-ocr-mode="inventory" type="button">在庫表</button>
+              <button class="mode-button" data-ocr-mode="sales" type="button">売上表</button>
+            </div>
+          </header>
+          <div class="import-body">
+            <label class="upload-zone" id="uploadZone">
+              <input id="salesImageInput" type="file" accept="image/*" capture="environment" multiple>
+              <span>＋ 画像を選択・撮影</span>
+              <small>画像ファイル・最大4枚</small>
+            </label>
+            <div class="preview-strip" id="imagePreview">
+              <div class="preview-empty">選択した画像がここに表示されます</div>
+            </div>
+          </div>
+          <div class="import-actions">
+            <button class="button primary" id="analyzeImageBtn" type="button" disabled>在庫表を読み取る</button>
+            <button class="button" id="clearImageBtn" type="button" disabled>クリア</button>
+            <span class="import-status" id="ocrStatus">画像を選択してください</span>
+            <span class="hint">読取時、画像はOpenAI APIへ送信されます。</span>
+          </div>
+          <div class="ocr-results" id="ocrResults" hidden>
+            <div class="ocr-meta">
+              <label class="field">
+                <span id="ocrDateLabel">追加する日</span>
+                <input id="ocrDate" type="date">
+              </label>
+              <div class="ocr-warning" id="ocrWarnings"></div>
+            </div>
+            <div class="ocr-table-wrap">
+              <table class="ocr-table">
+                <thead id="ocrResultHead">
+                  <tr>
+                    <th>取込</th>
+                    <th>店舗名</th>
+                    <th>花材名</th>
+                    <th>単価</th>
+                    <th>画像の文字</th>
+                    <th>確信度</th>
+                  </tr>
+                </thead>
+                <tbody id="ocrResultBody"></tbody>
+              </table>
+            </div>
+            <div class="import-actions">
+              <button class="button primary" id="applyOcrBtn" type="button">確認した店舗・花材を追加</button>
+              <span class="hint" id="ocrApplyHint">同じ日・店舗・花材・単価の項目は重複追加しません。</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="metrics" aria-label="集計">
+          <article class="metric green">
+            <span class="label">売上金額</span>
+            <strong id="metricAmount">¥0</strong>
+            <small id="metricAmountSub">0明細</small>
+          </article>
+          <article class="metric blue">
+            <span class="label">納品 / 販売</span>
+            <strong id="metricMovement">0 / 0</strong>
+            <small id="metricMovementSub">当日合計</small>
+          </article>
+          <article class="metric gold">
+            <span class="label">繰越在庫</span>
+            <strong id="metricCarry">0</strong>
+            <small id="metricCarrySub">翌日の開始在庫</small>
+          </article>
+          <article class="metric rose">
+            <span class="label">確認が必要</span>
+            <strong id="metricAlerts">0</strong>
+            <small>不足・少なめ・1週間前</small>
+          </article>
+        </section>
+
+        <section class="panel analytics" aria-label="売上分析">
+          <article class="analysis-card">
+            <div>
+              <h2>1か月前の売上</h2>
+              <div class="hint" id="monthAgoDate">-</div>
+            </div>
+            <strong id="monthAgoAmount">¥0</strong>
+            <small class="hint" id="monthAgoSub">販売 0点</small>
+          </article>
+          <article class="analysis-card">
+            <div class="annual-head">
+              <h2>年間 花別販売</h2>
+              <span class="hint" id="annualYear">-</span>
+            </div>
+            <div class="annual-list" id="annualFlowerList"></div>
+          </article>
+        </section>
+
+        <section class="region-summary" id="regionSummary" aria-label="地域別サマリー"></section>
+
+        <section class="board" id="board" aria-label="地域別店舗入力"></section>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const STORAGE_KEY = "flower-flow-region-v2";
+    const LEGACY_KEY = "flower-flow-v1";
+    const LOW_STOCK_LIMIT = 8;
+    const OLD_FLOWER_DAYS = 6;
+    const DEFAULT_REGIONS = ["田辺市", "御坊市", "その他"];
+    const UNASSIGNED_REGION = "その他";
+
+    const els = {
+      date: document.getElementById("dateInput"),
+      prevDay: document.getElementById("prevDay"),
+      nextDay: document.getElementById("nextDay"),
+      carryForward: document.getElementById("carryForwardBtn"),
+      export: document.getElementById("exportBtn"),
+      syncStatus: document.getElementById("syncStatus"),
+      regionForm: document.getElementById("regionForm"),
+      newRegion: document.getElementById("newRegion"),
+      regionNav: document.getElementById("regionNav"),
+      regionCount: document.getElementById("regionCount"),
+      storeForm: document.getElementById("storeForm"),
+      newStore: document.getElementById("newStore"),
+      newStoreRegion: document.getElementById("newStoreRegion"),
+      storeCount: document.getElementById("storeCount"),
+      search: document.getElementById("searchInput"),
+      viewLabel: document.getElementById("viewLabel"),
+      salesImageInput: document.getElementById("salesImageInput"),
+      importTitle: document.getElementById("importTitle"),
+      importDescription: document.getElementById("importDescription"),
+      importMode: document.getElementById("importMode"),
+      uploadZone: document.getElementById("uploadZone"),
+      imagePreview: document.getElementById("imagePreview"),
+      analyzeImage: document.getElementById("analyzeImageBtn"),
+      clearImage: document.getElementById("clearImageBtn"),
+      ocrStatus: document.getElementById("ocrStatus"),
+      ocrResults: document.getElementById("ocrResults"),
+      ocrDateLabel: document.getElementById("ocrDateLabel"),
+      ocrDate: document.getElementById("ocrDate"),
+      ocrWarnings: document.getElementById("ocrWarnings"),
+      ocrResultHead: document.getElementById("ocrResultHead"),
+      ocrResultBody: document.getElementById("ocrResultBody"),
+      applyOcr: document.getElementById("applyOcrBtn"),
+      ocrApplyHint: document.getElementById("ocrApplyHint"),
+      monthAgoDate: document.getElementById("monthAgoDate"),
+      monthAgoAmount: document.getElementById("monthAgoAmount"),
+      monthAgoSub: document.getElementById("monthAgoSub"),
+      annualYear: document.getElementById("annualYear"),
+      annualFlowerList: document.getElementById("annualFlowerList"),
+      regionSummary: document.getElementById("regionSummary"),
+      board: document.getElementById("board"),
+      toast: document.getElementById("toast"),
+      metrics: {
+        amount: document.getElementById("metricAmount"),
+        amountSub: document.getElementById("metricAmountSub"),
+        movement: document.getElementById("metricMovement"),
+        movementSub: document.getElementById("metricMovementSub"),
+        carry: document.getElementById("metricCarry"),
+        carrySub: document.getElementById("metricCarrySub"),
+        alerts: document.getElementById("metricAlerts"),
+      },
+    };
+
+    let state = loadState();
+    let activeRegion = "all";
+    let searchTerm = "";
+    let toastTimer = null;
+    let remoteAvailable = false;
+    let saveTimer = null;
+    let selectedImages = [];
+    let ocrExtraction = null;
+    let ocrMode = "inventory";
+
+    init();
+
+    function init() {
+      els.date.value = state.currentDate;
+      bindEvents();
+      updateImportModeUi();
+      render();
+      registerServiceWorker();
+      syncFromServer();
+    }
+
+    function bindEvents() {
+      els.date.addEventListener("change", () => {
+        state.currentDate = els.date.value || todayIso();
+        ensureDay(state.currentDate);
+        saveState();
+        render();
+      });
+
+      els.prevDay.addEventListener("click", () => shiftDay(-1));
+      els.nextDay.addEventListener("click", () => shiftDay(1));
+      els.carryForward.addEventListener("click", carryForward);
+      els.export.addEventListener("click", exportCsv);
+
+      els.regionForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const region = cleanText(els.newRegion.value);
+        if (!region) return;
+        const added = addRegion(region);
+        activeRegion = region;
+        els.newRegion.value = "";
+        saveState();
+        render();
+        showToast(added ? "地域を追加しました" : "すでにある地域です");
+      });
+
+      els.storeForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const store = cleanText(els.newStore.value);
+        const region = els.newStoreRegion.value || UNASSIGNED_REGION;
+        if (!store) return;
+        const added = addStore(store, region);
+        activeRegion = region;
+        els.newStore.value = "";
+        saveState();
+        render();
+        showToast(added ? "店舗を追加しました" : "すでにある店舗です");
+      });
+
+      els.search.addEventListener("input", (event) => {
+        searchTerm = cleanText(event.target.value).toLowerCase();
+        render();
+      });
+
+      els.salesImageInput.addEventListener("change", (event) => {
+        handleImageFiles(event.target.files);
+      });
+      els.importMode.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-ocr-mode]");
+        if (!button || button.dataset.ocrMode === ocrMode) return;
+        ocrMode = button.dataset.ocrMode;
+        ocrExtraction = null;
+        els.ocrResults.hidden = true;
+        updateImportModeUi();
+      });
+      els.uploadZone.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        els.uploadZone.classList.add("dragging");
+      });
+      els.uploadZone.addEventListener("dragleave", () => els.uploadZone.classList.remove("dragging"));
+      els.uploadZone.addEventListener("drop", (event) => {
+        event.preventDefault();
+        els.uploadZone.classList.remove("dragging");
+        handleImageFiles(event.dataTransfer.files);
+      });
+      els.analyzeImage.addEventListener("click", analyzeSelectedImages);
+      els.clearImage.addEventListener("click", clearSelectedImages);
+      els.applyOcr.addEventListener("click", applyOcrResults);
+
+      els.regionNav.addEventListener("click", handleRegionClick);
+      els.regionSummary.addEventListener("click", handleRegionClick);
+      els.regionNav.addEventListener("click", (event) => {
+        const editButton = event.target.closest("[data-edit-region]");
+        if (!editButton) return;
+        event.stopPropagation();
+        renameRegion(editButton.dataset.editRegion);
+      });
+
+      els.board.addEventListener("input", (event) => {
+        const input = event.target.closest("[data-row][data-field]");
+        if (!input) return;
+        const row = findRow(input.dataset.row);
+        if (!row) return;
+        const field = input.dataset.field;
+        row[field] = textFields().includes(field) ? cleanText(input.value) : toNumber(input.value);
+        saveState();
+        refreshComputed(row.store);
+      });
+
+      els.board.addEventListener("change", (event) => {
+        const unitInput = event.target.closest("[data-row][data-unit]");
+        if (unitInput) {
+          const row = findRow(unitInput.dataset.row);
+          if (!row) return;
+          row.unit = unitInput.value;
+          saveState();
+          refreshComputed(row.store);
+          return;
+        }
+
+        const regionSelect = event.target.closest("[data-store-region]");
+        if (regionSelect) {
+          const store = regionSelect.dataset.storeRegion;
+          moveStore(store, regionSelect.value);
+        }
+      });
+
+      els.board.addEventListener("submit", (event) => {
+        const form = event.target.closest("[data-add-product]");
+        if (!form) return;
+        event.preventDefault();
+        addProductFromForm(form);
+      });
+
+      els.board.addEventListener("click", (event) => {
+        const deleteRow = event.target.closest("[data-delete-row]");
+        if (deleteRow) {
+          deleteProduct(deleteRow.dataset.deleteRow);
+          return;
+        }
+
+        const deleteStore = event.target.closest("[data-delete-store]");
+        if (deleteStore) {
+          removeStore(deleteStore.dataset.deleteStore);
+        }
+      });
+
+      window.addEventListener("resize", debounce(() => refreshComputed(), 120));
+    }
+
+    function textFields() {
+      return ["flower"];
+    }
+
+    function handleRegionClick(event) {
+      const button = event.target.closest("[data-region-target]");
+      if (!button) return;
+      activeRegion = button.dataset.regionTarget;
+      render();
+      if (activeRegion !== "all") {
+        requestAnimationFrame(() => {
+          const section = document.querySelector(`[data-region-section="${cssEscape(activeRegion)}"]`);
+          if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
+    }
+
+    async function syncFromServer() {
+      if (location.protocol === "file:") {
+        setSyncStatus("この端末に保存", "");
+        return;
+      }
+
+      try {
+        setSyncStatus("共有データ確認中", "");
+        const response = await fetch("/api/state", { cache: "no-store" });
+        if (!response.ok) throw new Error("共有データを読めませんでした");
+        const remoteState = await response.json();
+        remoteAvailable = true;
+
+        if (remoteState && remoteState.days && remoteState.currentDate) {
+          state = remoteState;
+          ensureStateShape(state);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          els.date.value = state.currentDate;
+          render();
+          setSyncStatus("共有保存中", "shared");
+          showToast("共有データを読み込みました");
+          return;
+        }
+
+        await saveState({ immediate: true });
+        setSyncStatus("共有保存中", "shared");
+      } catch (error) {
+        remoteAvailable = false;
+        setSyncStatus("この端末に保存", "error");
+      }
+    }
+
+    function registerServiceWorker() {
+      if (!("serviceWorker" in navigator) || location.protocol === "file:") return;
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+
+    function setSyncStatus(text, mode) {
+      els.syncStatus.textContent = text;
+      els.syncStatus.className = `sync-status ${mode || ""}`.trim();
+    }
+
+    function updateImportModeUi() {
+      els.importMode.querySelectorAll("[data-ocr-mode]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.ocrMode === ocrMode);
+      });
+      const inventoryMode = ocrMode === "inventory";
+      els.importTitle.textContent = inventoryMode ? "在庫表画像から店舗・花材を追加" : "売上画像から店舗売上を入力";
+      els.importDescription.textContent = inventoryMode
+        ? "スプレッドシートの画像から店舗名、左列の花材名、単価を読み取ります。"
+        : "店舗別の売上表や集計画像から、店舗名、売上金額、販売数量を読み取ります。";
+      els.analyzeImage.textContent = inventoryMode ? "在庫表を読み取る" : "売上表を読み取る";
+      els.ocrDateLabel.textContent = inventoryMode ? "追加する日" : "売上日";
+      els.applyOcr.textContent = inventoryMode ? "確認した店舗・花材を追加" : "確認した店舗売上を反映";
+      els.ocrApplyHint.textContent = inventoryMode
+        ? "同じ日・店舗・花材・単価の項目は重複追加しません。"
+        : "同じ日・同じ店舗の画像売上は上書きされ、二重加算されません。";
+      els.ocrResultHead.innerHTML = inventoryMode
+        ? `<tr><th>取込</th><th>店舗名</th><th>花材名</th><th>単価</th><th>画像の文字</th><th>確信度</th></tr>`
+        : `<tr><th>取込</th><th>店舗名</th><th>売上金額</th><th>販売数量</th><th>確信度</th></tr>`;
+      if (selectedImages.length) els.ocrStatus.textContent = `${selectedImages.length}枚を選択中`;
+    }
+
+    async function handleImageFiles(fileList) {
+      const files = [...(fileList || [])]
+        .filter((file) => file.type.startsWith("image/"))
+        .slice(0, 4);
+      if (!files.length) {
+        els.ocrStatus.textContent = "画像ファイルを選択してください";
+        return;
+      }
+
+      els.ocrStatus.textContent = "画像を準備しています…";
+      els.analyzeImage.disabled = true;
+      els.clearImage.disabled = true;
+      els.ocrResults.hidden = true;
+      ocrExtraction = null;
+      try {
+        selectedImages = await Promise.all(files.map(compressImageFile));
+        renderImagePreview();
+        els.analyzeImage.disabled = false;
+        els.clearImage.disabled = false;
+        els.ocrStatus.textContent = `${selectedImages.length}枚を選択中`;
+      } catch (error) {
+        selectedImages = [];
+        renderImagePreview();
+        els.ocrStatus.textContent = "画像を読み込めませんでした";
+      }
+    }
+
+    function renderImagePreview() {
+      els.imagePreview.innerHTML = selectedImages.length
+        ? selectedImages.map((image, index) => `<img class="preview-thumb" src="${image}" alt="選択画像 ${index + 1}">`).join("")
+        : `<div class="preview-empty">選択した画像がここに表示されます</div>`;
+    }
+
+    function clearSelectedImages() {
+      selectedImages = [];
+      ocrExtraction = null;
+      els.salesImageInput.value = "";
+      els.analyzeImage.disabled = true;
+      els.clearImage.disabled = true;
+      els.ocrResults.hidden = true;
+      els.ocrStatus.textContent = "画像を選択してください";
+      renderImagePreview();
+    }
+
+    async function analyzeSelectedImages() {
+      if (!selectedImages.length) return;
+      if (location.protocol === "file:") {
+        els.ocrStatus.textContent = "画像読取は共有サーバーのURLから開いた時に利用できます";
+        return;
+      }
+
+      els.analyzeImage.disabled = true;
+      els.ocrStatus.textContent = ocrMode === "inventory" ? "店舗名と花材を読み取っています…" : "店舗名と売上を読み取っています…";
+      try {
+        const response = await fetch("/api/ocr", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ images: selectedImages, mode: ocrMode }),
+        });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) throw new Error(payload.error || "画像の読取に失敗しました");
+        ocrExtraction = payload.result;
+        renderOcrResults();
+        if (ocrMode === "inventory") {
+          const sheets = Array.isArray(ocrExtraction.sheets) ? ocrExtraction.sheets : [];
+          const itemCount = sheets.reduce((sum, sheet) => sum + (Array.isArray(sheet.items) ? sheet.items.length : 0), 0);
+          els.ocrStatus.textContent = `${sheets.length}店舗・${itemCount}件の花材を読み取りました`;
+        } else {
+          const stores = Array.isArray(ocrExtraction.stores) ? ocrExtraction.stores : [];
+          els.ocrStatus.textContent = `${stores.length}件の店舗売上を読み取りました`;
+        }
+      } catch (error) {
+        els.ocrStatus.textContent = error.message || "画像の読取に失敗しました";
+      } finally {
+        els.analyzeImage.disabled = false;
+      }
+    }
+
+    function renderOcrResults() {
+      const warnings = Array.isArray(ocrExtraction && ocrExtraction.warnings) ? ocrExtraction.warnings : [];
+      els.ocrWarnings.textContent = warnings.join(" / ");
+      if (ocrMode === "inventory") {
+        const sheets = Array.isArray(ocrExtraction && ocrExtraction.sheets) ? ocrExtraction.sheets : [];
+        const items = sheets.flatMap((sheet) => (Array.isArray(sheet.items) ? sheet.items : []).map((item) => ({
+          ...item,
+          store_name: sheet.store_name || "",
+          document_date: sheet.document_date || "",
+        })));
+        const detectedDate = sheets.map((sheet) => normalizeDate(sheet.document_date)).find(Boolean);
+        els.ocrDate.value = detectedDate || state.currentDate;
+        els.ocrResultBody.innerHTML = items.length
+          ? items.map((item, index) => inventoryOcrResultRowHtml(item, index)).join("")
+          : `<tr><td colspan="6">店舗と花材を読み取れませんでした</td></tr>`;
+      } else {
+        const stores = Array.isArray(ocrExtraction && ocrExtraction.stores) ? ocrExtraction.stores : [];
+        els.ocrDate.value = normalizeDate(ocrExtraction && ocrExtraction.document_date) || state.currentDate;
+        els.ocrResultBody.innerHTML = stores.length
+          ? stores.map((item, index) => salesOcrResultRowHtml(item, index)).join("")
+          : `<tr><td colspan="5">店舗と売上を読み取れませんでした</td></tr>`;
+      }
+      els.ocrResults.hidden = false;
+    }
+
+    function inventoryOcrResultRowHtml(item, index) {
+      const confidence = Math.max(0, Math.min(1, Number(item.confidence) || 0));
+      return `
+        <tr data-ocr-row="${index}">
+          <td><input type="checkbox" data-ocr-include checked aria-label="取込対象"></td>
+          <td><input data-ocr-store value="${escapeHtml(item.store_name || "")}" aria-label="店舗名"></td>
+          <td><input data-ocr-flower value="${escapeHtml(normalizeImportedFlowerName(item.flower_name || ""))}" aria-label="花材名"></td>
+          <td><input data-ocr-price type="number" min="0" step="1" value="${toNumber(item.unit_price)}" aria-label="単価"></td>
+          <td>${escapeHtml(item.raw_text || "")}</td>
+          <td><span class="confidence">${Math.round(confidence * 100)}%</span></td>
+        </tr>
+      `;
+    }
+
+    function salesOcrResultRowHtml(item, index) {
+      const confidence = Math.max(0, Math.min(1, Number(item.confidence) || 0));
+      return `
+        <tr data-ocr-row="${index}">
+          <td><input type="checkbox" data-ocr-include checked aria-label="取込対象"></td>
+          <td><input data-ocr-store value="${escapeHtml(item.store_name || "")}" aria-label="店舗名"></td>
+          <td><input data-ocr-amount type="number" min="0" step="1" value="${toNumber(item.sales_amount)}" aria-label="売上金額"></td>
+          <td><input data-ocr-quantity type="number" min="0" step="1" value="${toNumber(item.sold_quantity)}" aria-label="販売数量"></td>
+          <td><span class="confidence">${Math.round(confidence * 100)}%</span></td>
+        </tr>
+      `;
+    }
+
+    function applyOcrResults() {
+      if (ocrMode === "sales") {
+        applySalesOcrResults();
+        return;
+      }
+      applyInventoryOcrResults();
+    }
+
+    function applyInventoryOcrResults() {
+      const date = normalizeDate(els.ocrDate.value) || state.currentDate;
+      const rows = [...els.ocrResultBody.querySelectorAll("[data-ocr-row]")];
+      let applied = 0;
+      let selected = 0;
+      let skipped = 0;
+      rows.forEach((row) => {
+        if (!row.querySelector("[data-ocr-include]").checked) return;
+        const store = cleanText(row.querySelector("[data-ocr-store]").value);
+        const flower = normalizeImportedFlowerName(row.querySelector("[data-ocr-flower]").value);
+        if (!store || !flower) return;
+        selected += 1;
+        const price = toNumber(row.querySelector("[data-ocr-price]").value);
+        if (!state.storeRegions[store]) {
+          const region = activeRegion !== "all" ? activeRegion : guessRegion(store);
+          addStore(store, region);
+        }
+        if (addImportedFlower(date, store, flower, price)) applied += 1;
+        else skipped += 1;
+      });
+
+      if (!selected) {
+        showToast("反映する店舗を選択してください");
+        return;
+      }
+      state.currentDate = date;
+      els.date.value = date;
+      saveState();
+      render();
+      showToast(applied ? `${applied}件の花材を追加しました${skipped ? `・${skipped}件は登録済み` : ""}` : "選択した花材はすべて登録済みです");
+    }
+
+    function applySalesOcrResults() {
+      const date = normalizeDate(els.ocrDate.value) || state.currentDate;
+      const rows = [...els.ocrResultBody.querySelectorAll("[data-ocr-row]")];
+      let applied = 0;
+      rows.forEach((row) => {
+        if (!row.querySelector("[data-ocr-include]").checked) return;
+        const store = cleanText(row.querySelector("[data-ocr-store]").value);
+        if (!store) return;
+        const amountValue = toNumber(row.querySelector("[data-ocr-amount]").value);
+        const quantity = toNumber(row.querySelector("[data-ocr-quantity]").value);
+        if (!state.storeRegions[store]) {
+          const region = activeRegion !== "all" ? activeRegion : guessRegion(store);
+          addStore(store, region);
+        }
+        upsertImportedSales(date, store, amountValue, quantity);
+        applied += 1;
+      });
+
+      if (!applied) {
+        showToast("反映する店舗を選択してください");
+        return;
+      }
+      state.currentDate = date;
+      els.date.value = date;
+      saveState();
+      render();
+      showToast(`${applied}店舗の売上を反映しました`);
+    }
+
+    function upsertImportedSales(date, store, amountValue, quantity) {
+      ensureDay(date);
+      state.days[date] = state.days[date].filter((row) => !(row.salesImport && row.store === store));
+      state.days[date].push({
+        id: makeId(),
+        store,
+        flower: "画像取込売上",
+        unit: "点",
+        price: 0,
+        opening: 0,
+        returned: 0,
+        delivered: 0,
+        sold: quantity,
+        receivedDate: date,
+        salesImport: true,
+        importedAmount: amountValue,
+        importedQuantity: quantity,
+      });
+    }
+
+    function addImportedFlower(date, store, flower, price) {
+      ensureDay(date);
+      const duplicate = state.days[date].some((row) => (
+        !row.salesImport &&
+        row.store === store &&
+        normalizeImportedFlowerName(row.flower) === flower &&
+        toNumber(row.price) === price
+      ));
+      if (duplicate) return false;
+      state.days[date].push({
+        id: makeId(),
+        store,
+        flower,
+        unit: "束",
+        price,
+        opening: 0,
+        returned: 0,
+        delivered: 0,
+        sold: 0,
+        receivedDate: date,
+      });
+      return true;
+    }
+
+    function normalizeImportedFlowerName(value) {
+      let name = cleanText(value).replace(/\s+/g, "");
+      name = name.replace(/^[しシ](?=([①②③④⑤⑥⑦⑧⑨]|$))/, "樒");
+      name = name.replace(/^[びビ](?=([①②③④⑤⑥⑦⑧⑨]|$))/, "ビシャコ");
+      name = name.replace(/^びしゃこ/i, "ビシャコ");
+      return name;
+    }
+
+    function compressImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => {
+          const image = new Image();
+          image.onerror = reject;
+          image.onload = () => {
+            const maxSide = 1800;
+            const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+            const width = Math.max(1, Math.round(image.naturalWidth * scale));
+            const height = Math.max(1, Math.round(image.naturalHeight * scale));
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const context = canvas.getContext("2d");
+            context.fillStyle = "#ffffff";
+            context.fillRect(0, 0, width, height);
+            context.drawImage(image, 0, 0, width, height);
+            resolve(canvas.toDataURL("image/jpeg", 0.86));
+          };
+          image.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (saved && saved.days && saved.currentDate) {
+          ensureStateShape(saved);
+          return saved;
+        }
+      } catch (error) {
+        // Ignore broken local data and fall back to migration or sample data.
+      }
+
+      try {
+        const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY));
+        if (legacy && legacy.days && legacy.currentDate) {
+          const migrated = migrateLegacyState(legacy);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+          return migrated;
+        }
+      } catch (error) {
+        // Ignore unavailable legacy data.
+      }
+
+      const seed = createSeedState();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+      return seed;
+    }
+
+    function migrateLegacyState(legacy) {
+      const days = {};
+      Object.entries(legacy.days || {}).forEach(([date, rows]) => {
+        days[date] = rows.map((row) => ({
+          id: row.id || makeId(),
+          store: cleanText(row.store) || "未設定",
+          flower: cleanText(row.flower) || "商品",
+          unit: cleanText(row.unit) || "束",
+          price: toNumber(row.price),
+          opening: toNumber(row.opening),
+          returned: toNumber(row.returned),
+          delivered: toNumber(row.delivered),
+          sold: toNumber(row.sold),
+          receivedDate: row.receivedDate || date,
+        }));
+      });
+
+      const storeRegions = {};
+      Object.values(days).flat().forEach((row) => {
+        if (!storeRegions[row.store]) storeRegions[row.store] = guessRegion(row.store);
+      });
+
+      const state = {
+        currentDate: legacy.currentDate || todayIso(),
+        regions: uniqueRegions([...DEFAULT_REGIONS, ...Object.values(storeRegions)]),
+        storeRegions,
+        days,
+      };
+      ensureStateShape(state);
+      return state;
+    }
+
+    function createSeedState() {
+      const currentDate = todayIso();
+      const stores = [
+        { name: "田辺駅前店", region: "田辺市" },
+        { name: "新庄店", region: "田辺市" },
+        { name: "白浜店", region: "田辺市" },
+        { name: "上富田店", region: "田辺市" },
+        { name: "御坊中央店", region: "御坊市" },
+        { name: "由良店", region: "御坊市" },
+        { name: "印南店", region: "御坊市" },
+      ];
+      const products = [
+        ["バラ ミックス", "束", 680],
+        ["ガーベラ", "本", 220],
+        ["季節のブーケ", "束", 1800],
+        ["ユリ", "本", 520],
+      ];
+      const days = {};
+      const storeRegions = {};
+
+      stores.forEach((store) => {
+        storeRegions[store.name] = store.region;
+      });
+
+      for (let dayOffset = -6; dayOffset <= 0; dayOffset += 1) {
+        const date = addDays(currentDate, dayOffset);
+        days[date] = [];
+        stores.forEach((store, storeIndex) => {
+          products.forEach(([flower, unit, price], productIndex) => {
+            const base = 16 + storeIndex * 3 + productIndex * 5 + Math.abs(dayOffset);
+            days[date].push({
+              id: makeId(),
+              store: store.name,
+              flower,
+              unit,
+              price,
+              opening: base + 14,
+              returned: (storeIndex + productIndex + Math.abs(dayOffset)) % 4,
+              delivered: 8 + ((productIndex * 4 + storeIndex + dayOffset + 8) % 14),
+              sold: Math.max(0, Math.round(base * 0.72 + ((storeIndex + productIndex) % 5))),
+              receivedDate: addDays(date, productIndex === 0 ? -6 : -productIndex),
+            });
+          });
+        });
+      }
+
+      return {
+        currentDate,
+        regions: [...DEFAULT_REGIONS],
+        storeRegions,
+        days,
+      };
+    }
+
+    function ensureStateShape(data) {
+      data.days = data.days || {};
+      data.regions = uniqueRegions(data.regions && data.regions.length ? data.regions : DEFAULT_REGIONS);
+      data.storeRegions = data.storeRegions || {};
+      Object.entries(data.days).forEach(([date, rows]) => {
+        rows.forEach((row) => {
+          row.id = row.id || makeId();
+          row.store = cleanText(row.store) || "未設定";
+          row.flower = cleanText(row.flower) || "商品";
+          row.unit = cleanText(row.unit) || "束";
+          row.price = toNumber(row.price);
+          row.opening = toNumber(row.opening);
+          row.returned = toNumber(row.returned);
+          row.delivered = toNumber(row.delivered);
+          row.sold = toNumber(row.sold);
+          row.receivedDate = normalizeDate(row.receivedDate) || date || data.currentDate || todayIso();
+          row.salesImport = Boolean(row.salesImport);
+          row.importedAmount = toNumber(row.importedAmount);
+          row.importedQuantity = toNumber(row.importedQuantity);
+          if (!data.storeRegions[row.store]) data.storeRegions[row.store] = guessRegion(row.store);
+        });
+      });
+      Object.values(data.storeRegions).forEach((region) => {
+        if (!data.regions.includes(region)) data.regions.push(region);
+      });
+      data.regions = uniqueRegions(data.regions);
+      if (!data.currentDate) data.currentDate = todayIso();
+      if (!data.days[data.currentDate]) data.days[data.currentDate] = [];
+    }
+
+    function render() {
+      ensureStateShape(state);
+      renderRegionOptions();
+      renderRegionNav();
+      renderMetrics();
+      renderAnalytics();
+      renderRegionSummary();
+      renderBoard();
+      renderViewLabel();
+    }
+
+    function renderRegionOptions() {
+      const options = getRegions().map((region) => `<option value="${escapeHtml(region)}">${escapeHtml(region)}</option>`).join("");
+      els.newStoreRegion.innerHTML = options;
+      if (activeRegion !== "all" && getRegions().includes(activeRegion)) {
+        els.newStoreRegion.value = activeRegion;
+      }
+    }
+
+    function renderRegionNav() {
+      const regions = getRegions();
+      els.regionCount.textContent = `${regions.length}地域`;
+      els.storeCount.textContent = `${getStores().length}店舗`;
+      const allStats = summarizeRows(getRows());
+      const buttons = [
+        navButton("all", "全地域", `${getStores().length}店舗`, allStats.amount, activeRegion === "all"),
+        ...regions.map((region) => {
+          const stores = storesForRegion(region);
+          const stats = summarizeRows(rowsForRegion(region));
+          return navButton(region, region, `${stores.length}店舗`, stats.amount, activeRegion === region);
+        }),
+      ];
+      els.regionNav.innerHTML = buttons.join("");
+    }
+
+    function navButton(target, label, subLabel, amountValue, active) {
+      const button = `
+        <button class="region-button ${active ? "active" : ""}" data-region-target="${escapeHtml(target)}" type="button">
+          <span>${escapeHtml(label)}<small>${escapeHtml(subLabel)}</small></span>
+          <b>${formatMoney(amountValue)}</b>
+        </button>
+      `;
+      if (target === "all") return `<div class="region-nav-item">${button}</div>`;
+      return `
+        <div class="region-nav-item">
+          ${button}
+          <button class="region-edit" data-edit-region="${escapeHtml(target)}" type="button" title="地域名を編集" aria-label="${escapeHtml(target)}を編集">✎</button>
+        </div>
+      `;
+    }
+
+    function renderMetrics() {
+      const rows = getViewRows();
+      const stats = summarizeRows(rows);
+      els.metrics.amount.textContent = formatMoney(stats.amount);
+      els.metrics.amountSub.textContent = `${rows.length}明細`;
+      els.metrics.movement.textContent = `${formatNumber(stats.delivered)} / ${formatNumber(stats.sold)}`;
+      els.metrics.movementSub.textContent = `返品 ${formatNumber(stats.returned)}`;
+      els.metrics.carry.textContent = `${formatNumber(stats.carry)} 点`;
+      els.metrics.carrySub.textContent = `在庫評価 ${formatMoney(stats.inventoryValue)}`;
+      els.metrics.alerts.textContent = stats.alerts;
+    }
+
+    function renderAnalytics() {
+      const previousMonth = monthKey(state.currentDate, -1);
+      const monthRows = rowsForMonth(previousMonth).filter(matchesViewContext);
+      const monthStats = summarizeRows(monthRows);
+      els.monthAgoDate.textContent = `${formatMonthKey(previousMonth)} 合計`;
+      els.monthAgoAmount.textContent = formatMoney(monthStats.amount);
+      els.monthAgoSub.textContent = `販売 ${formatNumber(monthStats.sold)}点・${monthStats.count}明細`;
+
+      const year = state.currentDate.slice(0, 4);
+      const annualRows = rowsForYear(year).filter(matchesViewContext);
+      const flowerData = aggregateFlowerSales(annualRows).slice(0, 7);
+      els.annualYear.textContent = `${year}年`;
+      els.annualFlowerList.innerHTML = flowerData.length
+        ? flowerData.map((item) => annualRowHtml(item, flowerData[0].sold)).join("")
+        : `<div class="empty">年間データがまだありません</div>`;
+    }
+
+    function annualRowHtml(item, maxSold) {
+      const width = maxSold ? Math.max(3, Math.round((item.sold / maxSold) * 100)) : 0;
+      return `
+        <div class="annual-row">
+          <strong>${escapeHtml(item.flower)}</strong>
+          <div class="annual-bar"><span style="width:${width}%"></span></div>
+          <span>${formatNumber(item.sold)}点 / ${formatMoney(item.amount)}</span>
+        </div>
+      `;
+    }
+
+    function renderRegionSummary() {
+      els.regionSummary.innerHTML = getRegions().map((region) => {
+        const stores = storesForRegion(region);
+        const stats = summarizeRows(rowsForRegion(region));
+        return `
+          <button class="region-tile ${activeRegion === region ? "active" : ""}" data-region-target="${escapeHtml(region)}" type="button">
+            <div class="tile-top">
+              <strong>${escapeHtml(region)}</strong>
+              <span>${formatMoney(stats.amount)}</span>
+            </div>
+            <div class="tile-stats">
+              <span>店舗<b>${stores.length}</b></span>
+              <span>納品<b>${formatNumber(stats.delivered)}</b></span>
+              <span>繰越<b>${formatNumber(stats.carry)}</b></span>
+            </div>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderBoard() {
+      const regions = activeRegion === "all" ? getRegions() : getRegions().filter((region) => region === activeRegion);
+      const html = regions.map((region) => regionSectionHtml(region)).filter(Boolean).join("");
+      els.board.innerHTML = html || `<div class="panel empty">表示する店舗がありません</div>`;
+    }
+
+    function regionSectionHtml(region) {
+      const stores = storesForRegion(region).filter((store) => storeMatchesView(store));
+      if (!stores.length && searchTerm) return "";
+      if (!stores.length && activeRegion === "all") return "";
+      const stats = summarizeRows(rowsForRegion(region).filter(matchesSearch));
+      const bodyHtml = stores.length
+        ? `<div class="store-grid">${stores.map((store) => storeCardHtml(store)).join("")}</div>`
+        : `<div class="panel empty">この地域にはまだ店舗がありません</div>`;
+      return `
+        <section class="region-section" data-region-section="${escapeHtml(region)}">
+          <header class="region-header">
+            <div>
+              <h2>${escapeHtml(region)}</h2>
+              <p>${stores.length}店舗・売上 ${formatMoney(stats.amount)}・確認 ${stats.alerts}件</p>
+            </div>
+            <button class="button" data-region-target="${escapeHtml(region)}" type="button">この地域へ</button>
+          </header>
+          ${bodyHtml}
+        </section>
+      `;
+    }
+
+    function storeCardHtml(store) {
+      const rows = rowsForStore(store);
+      const productRows = rows.filter((row) => !row.salesImport);
+      const visibleRows = productRows.filter((row) => storeNameMatches(store) || matchesSearch(row));
+      const stats = summarizeRows(rows);
+      const alertClass = [stats.alerts ? "alert" : "", stats.oldFlowers ? "old-alert" : ""].filter(Boolean).join(" ");
+      const productHtml = visibleRows.length
+        ? visibleRows.map(productRowHtml).join("")
+        : `<div class="empty">この店舗の商品明細はまだありません</div>`;
+      const oldLabel = stats.oldFlowers ? `・1週間前 ${stats.oldFlowers}件` : "";
+      const importLabel = rows.some((row) => row.salesImport) ? "・画像売上反映済み" : "";
+
+      return `
+        <article class="store-card ${alertClass}" data-store-card="${escapeHtml(store)}">
+          <header class="store-head">
+            <div class="store-title">
+              <h3>${escapeHtml(store)}</h3>
+              <div class="hint">${stats.count}明細・売上 ${formatMoney(stats.amount)}${oldLabel}${importLabel}</div>
+            </div>
+            <div class="store-actions">
+              <select data-store-region="${escapeHtml(store)}" aria-label="${escapeHtml(store)}の地域">
+                ${getRegions().map((region) => `<option value="${escapeHtml(region)}" ${regionForStore(store) === region ? "selected" : ""}>${escapeHtml(region)}</option>`).join("")}
+              </select>
+              <button class="small-icon" data-delete-store="${escapeHtml(store)}" type="button" title="店舗を削除" aria-label="${escapeHtml(store)}を削除">×</button>
+            </div>
+          </header>
+          <div class="store-summary" data-store-summary="${escapeHtml(store)}">
+            ${storeSummaryHtml(stats)}
+          </div>
+          <div class="product-list">
+            ${productHtml}
+          </div>
+          <form class="add-product" data-add-product="${escapeHtml(store)}">
+            <input name="flower" placeholder="商品を追加" required>
+            <input name="price" type="number" min="0" step="10" value="500" aria-label="単価">
+            <select name="unit" aria-label="単位">
+              <option value="束">束</option>
+              <option value="本">本</option>
+              <option value="鉢">鉢</option>
+              <option value="箱">箱</option>
+              <option value="個">個</option>
+            </select>
+            <button class="button primary" type="submit">追加</button>
+          </form>
+        </article>
+      `;
+    }
+
+    function productRowHtml(row) {
+      const rowCarry = carry(row);
+      const status = statusFor(rowCarry);
+      const old = isOldFlower(row);
+      const ageWarning = old ? `<div class="age-warning">${escapeHtml(oldFlowerMessage(row))}</div>` : "";
+      return `
+        <div class="product-row ${old ? "old-flower" : ""}" data-row-shell="${row.id}">
+          <div class="product-cell">
+            <label>商品</label>
+            <input class="product-name ${old ? "old-flower-name" : ""}" data-row="${row.id}" data-field="flower" value="${escapeHtml(row.flower)}" aria-label="商品名">
+            ${ageWarning}
+            <div class="product-meta">
+              <input class="price-input" type="number" min="0" step="10" data-row="${row.id}" data-field="price" value="${row.price}" aria-label="単価">
+              <select class="unit-select" data-row="${row.id}" data-unit="unit" aria-label="単位">
+                ${["束", "本", "鉢", "箱", "個"].map((unit) => `<option value="${unit}" ${row.unit === unit ? "selected" : ""}>${unit}</option>`).join("")}
+              </select>
+            </div>
+          </div>
+          ${quantityInput(row, "opening", "在庫")}
+          ${quantityInput(row, "returned", "返品")}
+          ${quantityInput(row, "delivered", "納品")}
+          ${quantityInput(row, "sold", "売上")}
+          <div class="product-cell">
+            <label>繰越</label>
+            <div class="computed ${old ? "bad" : status.key}" data-carry="${row.id}">${formatNumber(rowCarry)} ${escapeHtml(row.unit)}</div>
+          </div>
+          <div class="product-cell">
+            <label>金額</label>
+            <div class="computed amount" data-amount="${row.id}">${formatMoney(amount(row))}</div>
+          </div>
+          <button class="small-icon" data-delete-row="${row.id}" type="button" title="明細を削除" aria-label="明細を削除">×</button>
+        </div>
+      `;
+    }
+
+    function quantityInput(row, field, label) {
+      return `
+        <div class="product-cell">
+          <label>${label}</label>
+          <input class="cell-input" type="number" min="0" data-row="${row.id}" data-field="${field}" value="${row[field]}" aria-label="${label}">
+        </div>
+      `;
+    }
+
+    function storeSummaryHtml(stats) {
+      return `
+        <div><span>在庫</span><b>${formatNumber(stats.opening)}</b></div>
+        <div><span>納品</span><b>${formatNumber(stats.delivered)}</b></div>
+        <div><span>売上</span><b>${formatNumber(stats.sold)}</b></div>
+        <div><span>繰越</span><b>${formatNumber(stats.carry)}</b></div>
+      `;
+    }
+
+    function renderViewLabel() {
+      const regionLabel = activeRegion === "all" ? "全地域" : activeRegion;
+      const searchLabel = searchTerm ? `・検索中` : "";
+      els.viewLabel.textContent = `${regionLabel}を表示中${searchLabel}`;
+    }
+
+    function refreshComputed(store) {
+      getRows().forEach((row) => {
+        const carryEl = document.querySelector(`[data-carry="${cssEscape(row.id)}"]`);
+        const amountEl = document.querySelector(`[data-amount="${cssEscape(row.id)}"]`);
+        if (!carryEl || !amountEl) return;
+        const rowCarry = carry(row);
+        const status = statusFor(rowCarry);
+        carryEl.textContent = `${formatNumber(rowCarry)} ${row.unit}`;
+        carryEl.className = `computed ${status.key}`;
+        amountEl.textContent = formatMoney(amount(row));
+      });
+
+      if (store) {
+        const summary = document.querySelector(`[data-store-summary="${cssEscape(store)}"]`);
+        if (summary) summary.innerHTML = storeSummaryHtml(summarizeRows(rowsForStore(store)));
+        const card = document.querySelector(`[data-store-card="${cssEscape(store)}"]`);
+        if (card) {
+          const stats = summarizeRows(rowsForStore(store));
+          card.classList.toggle("alert", stats.alerts > 0);
+          card.classList.toggle("old-alert", stats.oldFlowers > 0);
+        }
+      }
+
+      renderRegionNav();
+      renderMetrics();
+      renderAnalytics();
+      renderRegionSummary();
+      renderViewLabel();
+    }
+
+    function addRegion(region) {
+      if (state.regions.includes(region)) return false;
+      state.regions.push(region);
+      state.regions = uniqueRegions(state.regions);
+      return true;
+    }
+
+    function renameRegion(oldRegion) {
+      const current = cleanText(oldRegion);
+      if (!current || current === "all") return;
+      const next = cleanText(prompt(`${current}の新しい地域名`, current));
+      if (!next || next === current) return;
+      const exists = state.regions.includes(next);
+      if (exists && !confirm(`${next}はすでにあります。${current}の店舗を${next}にまとめますか？`)) return;
+
+      state.regions = uniqueRegions(state.regions.map((region) => region === current ? next : region));
+      Object.keys(state.storeRegions).forEach((store) => {
+        if (state.storeRegions[store] === current) state.storeRegions[store] = next;
+      });
+      if (activeRegion === current) activeRegion = next;
+      saveState();
+      render();
+      showToast(exists ? "地域をまとめました" : "地域名を変更しました");
+    }
+
+    function addStore(store, region) {
+      const name = cleanText(store);
+      if (!name) return false;
+      const exists = Object.keys(state.storeRegions).includes(name);
+      if (!state.regions.includes(region)) addRegion(region);
+      if (!exists) {
+        state.storeRegions[name] = region;
+        return true;
+      }
+      state.storeRegions[name] = region;
+      return false;
+    }
+
+    function moveStore(store, region) {
+      if (!state.regions.includes(region)) addRegion(region);
+      state.storeRegions[store] = region;
+      activeRegion = region;
+      saveState();
+      render();
+      showToast("店舗の地域を変更しました");
+    }
+
+    function removeStore(store) {
+      const count = Object.values(state.days).reduce((sum, rows) => sum + rows.filter((row) => row.store === store).length, 0);
+      const message = count
+        ? `${store}を削除しますか？すべての日付から${count}件の明細も削除されます。`
+        : `${store}を削除しますか？`;
+      if (!confirm(message)) return;
+
+      delete state.storeRegions[store];
+      Object.keys(state.days).forEach((date) => {
+        state.days[date] = state.days[date].filter((row) => row.store !== store);
+      });
+      saveState();
+      render();
+      showToast("店舗を削除しました");
+    }
+
+    function addProductFromForm(form) {
+      const store = form.dataset.addProduct;
+      const data = new FormData(form);
+      const flower = cleanText(data.get("flower"));
+      if (!store || !flower) return;
+      getRows().push({
+        id: makeId(),
+        store,
+        flower,
+        unit: cleanText(data.get("unit")) || "束",
+        price: toNumber(data.get("price")),
+        opening: 0,
+        returned: 0,
+        delivered: 0,
+        sold: 0,
+        receivedDate: state.currentDate,
+      });
+      form.reset();
+      form.elements.price.value = 500;
+      saveState();
+      render();
+      showToast("商品を追加しました");
+    }
+
+    function deleteProduct(id) {
+      state.days[state.currentDate] = getRows().filter((row) => row.id !== id);
+      saveState();
+      render();
+      showToast("明細を削除しました");
+    }
+
+    function shiftDay(offset) {
+      const next = addDays(state.currentDate, offset);
+      state.currentDate = next;
+      ensureDay(next);
+      els.date.value = next;
+      saveState();
+      render();
+    }
+
+    function carryForward() {
+      const nextDate = addDays(state.currentDate, 1);
+      state.days[nextDate] = getRows().map((row) => ({
+        id: makeId(),
+        store: row.store,
+        flower: row.flower,
+        unit: row.unit,
+        price: row.price,
+        opening: Math.max(carry(row), 0),
+        returned: 0,
+        delivered: 0,
+        sold: 0,
+        receivedDate: row.receivedDate || state.currentDate,
+      }));
+      state.currentDate = nextDate;
+      els.date.value = nextDate;
+      saveState();
+      render();
+      showToast("翌日の在庫に繰り越しました");
+    }
+
+    function exportCsv() {
+      const rows = getViewRows();
+      const header = ["日付", "地域", "店舗", "花材", "入れた日", "単位", "単価", "在庫", "返品", "納品", "売上", "繰越", "売上金額"];
+      const lines = [
+        header,
+        ...rows.map((row) => [
+          state.currentDate,
+          regionForStore(row.store),
+          row.store,
+          row.flower,
+          row.receivedDate,
+          row.unit,
+          row.price,
+          row.opening,
+          row.returned,
+          row.delivered,
+          row.sold,
+          carry(row),
+          amount(row),
+        ]),
+      ].map((line) => line.map(csvCell).join(","));
+
+      const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `flower-flow-${state.currentDate}.csv`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      showToast("CSVを書き出しました");
+    }
+
+    function getRows(date = state.currentDate) {
+      ensureDay(date);
+      return state.days[date];
+    }
+
+    function ensureDay(date) {
+      if (!state.days[date]) state.days[date] = [];
+    }
+
+    function getRegions() {
+      state.regions = uniqueRegions(state.regions || DEFAULT_REGIONS);
+      return state.regions;
+    }
+
+    function getStores() {
+      const names = new Set(Object.keys(state.storeRegions || {}));
+      Object.values(state.days || {}).flat().forEach((row) => names.add(row.store));
+      return [...names].filter(Boolean).sort((a, b) => {
+        const regionCompare = regionForStore(a).localeCompare(regionForStore(b), "ja");
+        return regionCompare || a.localeCompare(b, "ja");
+      });
+    }
+
+    function storesForRegion(region) {
+      return getStores().filter((store) => regionForStore(store) === region);
+    }
+
+    function rowsForRegion(region) {
+      return getRows().filter((row) => regionForStore(row.store) === region);
+    }
+
+    function rowsForStore(store) {
+      return getRows().filter((row) => row.store === store);
+    }
+
+    function getViewRows() {
+      return getRows().filter(matchesViewContext);
+    }
+
+    function matchesViewContext(row) {
+      const inRegion = activeRegion === "all" || regionForStore(row.store) === activeRegion;
+      return inRegion && matchesSearch(row);
+    }
+
+    function rowsForMonth(month) {
+      return Object.entries(state.days)
+        .filter(([date]) => date.startsWith(month))
+        .flatMap(([date, rows]) => rows.map((row) => ({ ...row, _sourceDate: date })));
+    }
+
+    function rowsForYear(year) {
+      return Object.entries(state.days)
+        .filter(([date]) => date.startsWith(`${year}-`))
+        .flatMap(([date, rows]) => rows.map((row) => ({ ...row, _sourceDate: date })));
+    }
+
+    function storeMatchesView(store) {
+      if (!searchTerm) return true;
+      if (storeNameMatches(store)) return true;
+      return rowsForStore(store).some(matchesSearch);
+    }
+
+    function storeNameMatches(store) {
+      return !searchTerm || store.toLowerCase().includes(searchTerm);
+    }
+
+    function matchesSearch(row) {
+      if (!searchTerm) return true;
+      return `${row.store} ${row.flower}`.toLowerCase().includes(searchTerm);
+    }
+
+    function findRow(id) {
+      return getRows().find((row) => row.id === id);
+    }
+
+    function regionForStore(store) {
+      return state.storeRegions[store] || guessRegion(store);
+    }
+
+    function summarizeRows(rows) {
+      const summary = { count: 0, amount: 0, opening: 0, returned: 0, delivered: 0, sold: 0, carry: 0, inventoryValue: 0, alerts: 0, oldFlowers: 0 };
+      const salesGroups = new Map();
+
+      rows.forEach((row) => {
+        const date = row._sourceDate || state.currentDate;
+        const groupKey = `${date}::${row.store}`;
+        const group = salesGroups.get(groupKey) || { productAmount: 0, productSold: 0, report: null };
+        if (row.salesImport) {
+          group.report = row;
+          salesGroups.set(groupKey, group);
+          return;
+        }
+
+        summary.count += 1;
+        summary.opening += toNumber(row.opening);
+        summary.returned += toNumber(row.returned);
+        summary.delivered += toNumber(row.delivered);
+        summary.carry += carry(row);
+        summary.inventoryValue += Math.max(carry(row), 0) * toNumber(row.price);
+        if (isOldFlower(row)) summary.oldFlowers += 1;
+        if (statusFor(carry(row)).key !== "good" || isOldFlower(row)) summary.alerts += 1;
+        group.productAmount += amount(row);
+        group.productSold += toNumber(row.sold);
+        salesGroups.set(groupKey, group);
+      });
+
+      salesGroups.forEach((group) => {
+        summary.amount += group.report ? toNumber(group.report.importedAmount) : group.productAmount;
+        summary.sold += group.report && toNumber(group.report.importedQuantity) > 0
+          ? toNumber(group.report.importedQuantity)
+          : group.productSold;
+      });
+      return summary;
+    }
+
+    function aggregateFlowerSales(rows) {
+      const map = new Map();
+      rows.filter((row) => !row.salesImport).forEach((row) => {
+        const flower = row.flower || "未設定";
+        const current = map.get(flower) || { flower, sold: 0, amount: 0 };
+        current.sold += toNumber(row.sold);
+        current.amount += amount(row);
+        map.set(flower, current);
+      });
+      return [...map.values()].sort((a, b) => b.sold - a.sold || b.amount - a.amount);
+    }
+
+    function carry(row) {
+      if (row.salesImport) return 0;
+      return toNumber(row.opening) - toNumber(row.returned) + toNumber(row.delivered) - toNumber(row.sold);
+    }
+
+    function amount(row) {
+      if (row.salesImport) return toNumber(row.importedAmount);
+      return toNumber(row.sold) * toNumber(row.price);
+    }
+
+    function statusFor(value) {
+      if (value < 0) return { key: "bad", label: "不足" };
+      if (value <= LOW_STOCK_LIMIT) return { key: "low", label: "少なめ" };
+      return { key: "good", label: "良好" };
+    }
+
+    function isOldFlower(row) {
+      if (row.salesImport) return false;
+      return flowerAge(row) >= OLD_FLOWER_DAYS;
+    }
+
+    function flowerAge(row) {
+      const receivedDate = normalizeDate(row.receivedDate);
+      if (!receivedDate) return 0;
+      return Math.max(0, daysBetween(receivedDate, state.currentDate));
+    }
+
+    function oldFlowerMessage(row) {
+      const days = flowerAge(row);
+      const label = days === OLD_FLOWER_DAYS ? "1週間前" : `${formatNumber(days)}日前`;
+      return `${formatMonthDay(row.receivedDate)}に入れたお花です（${label}）`;
+    }
+
+    function guessRegion(store) {
+      const name = cleanText(store);
+      if (/田辺|白浜|新庄|上富田/.test(name)) return "田辺市";
+      if (/御坊|由良|印南|日高/.test(name)) return "御坊市";
+      return UNASSIGNED_REGION;
+    }
+
+    function uniqueRegions(regions) {
+      return [...new Set(regions.map(cleanText).filter(Boolean))];
+    }
+
+    function saveState(options = {}) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (!remoteAvailable || location.protocol === "file:") {
+        setSyncStatus("この端末に保存", "");
+        return Promise.resolve();
+      }
+
+      if (options.immediate) {
+        clearTimeout(saveTimer);
+        return saveStateToServer();
+      }
+
+      setSyncStatus("共有保存中…", "shared");
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveStateToServer, 450);
+      return Promise.resolve();
+    }
+
+    async function saveStateToServer() {
+      try {
+        const response = await fetch("/api/state", {
+          method: "PUT",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(state),
+        });
+        if (!response.ok) throw new Error("保存に失敗しました");
+        setSyncStatus("共有保存済み", "shared");
+      } catch (error) {
+        remoteAvailable = false;
+        setSyncStatus("この端末に保存", "error");
+        showToast("共有保存に失敗しました。この端末には保存されています");
+      }
+    }
+
+    function toNumber(value) {
+      const number = Number(value);
+      return Number.isFinite(number) ? Math.max(0, number) : 0;
+    }
+
+    function cleanText(value) {
+      return String(value || "").replace(/\s+/g, " ").trim();
+    }
+
+    function formatMoney(value) {
+      return new Intl.NumberFormat("ja-JP", { style: "currency", currency: "JPY", maximumFractionDigits: 0 }).format(value);
+    }
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat("ja-JP", { maximumFractionDigits: 0 }).format(value);
+    }
+
+    function csvCell(value) {
+      return `"${String(value ?? "").replace(/"/g, '""')}"`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function cssEscape(value) {
+      if (window.CSS && CSS.escape) return CSS.escape(value);
+      return String(value).replace(/"/g, '\\"');
+    }
+
+    function todayIso() {
+      const date = new Date();
+      date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+      return date.toISOString().slice(0, 10);
+    }
+
+    function normalizeDate(value) {
+      const text = cleanText(value);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+      const date = new Date(text);
+      if (Number.isNaN(date.getTime())) return "";
+      date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+      return date.toISOString().slice(0, 10);
+    }
+
+    function addDays(isoDate, days) {
+      const date = new Date(`${isoDate}T00:00:00`);
+      date.setDate(date.getDate() + days);
+      date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+      return date.toISOString().slice(0, 10);
+    }
+
+    function monthKey(isoDate, offsetMonths = 0) {
+      const date = new Date(`${isoDate}T00:00:00`);
+      date.setDate(1);
+      date.setMonth(date.getMonth() + offsetMonths);
+      date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+      return date.toISOString().slice(0, 7);
+    }
+
+    function formatMonthKey(key) {
+      const [year, month] = key.split("-");
+      return `${year}年${Number(month)}月`;
+    }
+
+    function daysBetween(startIso, endIso) {
+      const start = new Date(`${startIso}T00:00:00`);
+      const end = new Date(`${endIso}T00:00:00`);
+      return Math.floor((end - start) / 86400000);
+    }
+
+    function formatMonthDay(isoDate) {
+      const date = normalizeDate(isoDate);
+      if (!date) return "";
+      const [, month, day] = date.split("-");
+      return `${Number(month)}月${Number(day)}日`;
+    }
+
+    function makeId() {
+      return `row-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    function debounce(fn, wait) {
+      let timeout = null;
+      return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn(...args), wait);
+      };
+    }
+
+    function showToast(message) {
+      clearTimeout(toastTimer);
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      toastTimer = setTimeout(() => els.toast.classList.remove("show"), 2200);
+    }
+  </script>
+</body>
+</html>
