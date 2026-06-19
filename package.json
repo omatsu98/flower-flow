@@ -1,0 +1,12 @@
+{
+  "name": "flower-flow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "地域別の花屋在庫管理アプリ",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
