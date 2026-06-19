@@ -1,0 +1,18 @@
+{
+  "name": "Flower Flow",
+  "short_name": "Flower Flow",
+  "description": "地域別に店舗の花在庫、納品、売上を共有管理するアプリ",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f7f4",
+  "theme_color": "#1f7a58",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
